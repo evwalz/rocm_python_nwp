@@ -12,17 +12,17 @@ def cpa(a, b):
     """
     Calculate CPA coefficient.
 
-    CPA is attains values between zero and one. Weighted probability of concordance. 
+    CPA attains values between zero and one. Weighted probability of concordance. 
 
     Parameters
     ----------
-    a : 1D array_like, 1-D array containing obervation. Need to have the same length in the ``axis`` dimension as b.
-	b : 1D array_like, 1-D array containing forecast for observation a.
+    a : 1D array_like, 1-D array containing observation (reponse). Need to have the same length in the ``axis`` dimension as b.
+    b : 1D array_like, 1-D array containing forecast for observation a.
        
     Returns
     -------
     correlation : float
-        CPA coefficient 
+        	  CPA coefficient 
     """    
     a = np.asarray(a)
     if a.ndim > 1:
