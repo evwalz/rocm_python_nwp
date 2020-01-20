@@ -1,9 +1,30 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Jan 17 17:41:40 2020
+
+@author: walz
+"""
+
 import numpy as np
 from scipy import interp
 import matplotlib.pyplot as plt
 from scipy.stats import rankdata
 
 def uroc(response, predictor):
+        """
+    Compute uroc curve.
+
+    Visualizes the performances of predictors for real valued forecasting problems. 
+
+    Parameters
+    ----------
+    response : 1D array_like, 1-D array containing obervation. Need to have the same length in the ``axis`` dimension as b.
+	predictor : 1D array_like, 1-D array containing forecast for observation a.
+       
+    Returns
+    -------
+    Plot of uroc curve
+    """  
     response_sorted_indices = np.argsort(response)
     response_sorted = response[response_sorted_indices]
     predictor_sorted = predictor[response_sorted_indices]
