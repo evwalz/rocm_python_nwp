@@ -31,7 +31,10 @@ def uroc(response, predictor):
     farate, hitrate = compute_uroc_approx(response_sorted, predictor_sorted)
     cpa_approx = np.round(Trapezoidal(farate, hitrate),2)
     plt.plot(farate,hitrate)
-    plt.text(0.7,0.2,'CPA:%s'%(cpa_approx))
+    plt.plot([0,1],[0,1], '--', color='grey')
+    plt.ylabel('Sensitivity')
+    plt.xlabel('1 - Specificity')
+    plt.text(0.7,0.2,'CPA: {:3.2f}'.format(cpa_approx))
 
 
 def compute_uroc_approx(response, predictor):
