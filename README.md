@@ -1,4 +1,4 @@
-## Using ROCM in Numerical Weather Prediction (NWP)
+## ROCM in Numerical Weather Prediction (NWP)
 
 Code to replicate the CPA plots for the numerical weather prediction example in the paper "ROC movies — a new generalization to a popular classic (Example_NWP). 
 
