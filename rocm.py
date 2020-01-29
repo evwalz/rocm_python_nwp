@@ -14,6 +14,21 @@ import imageio
 from uroc import uroc, Trapezoidal
 
 def rocm(response, predictor, path, fps = 10, b = 1):
+    """
+    Creates a ROC movie.
+
+    Visualizes the performances of predictors for real valued forecasting problems. 
+
+    Parameters
+    ----------
+    response : 1D array_like, 1-D array containing obervation. Need to have the same length in the ``axis`` dimension as b.
+	predictor : 1D array_like, 1-D array containing forecast for observation a.
+    path: String, Example: /home/animation.gif 
+       
+    Returns
+    -------
+    Gif animation
+    """ 
     response = np.array(response)
     predictor = np.array(predictor)
     

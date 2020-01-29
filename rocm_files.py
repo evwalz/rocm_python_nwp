@@ -23,7 +23,7 @@ def rocm(response, predictor, path):
     ----------
     response : 1D array_like, 1-D array containing obervation. Need to have the same length in the ``axis`` dimension as b.
 	predictor : 1D array_like, 1-D array containing forecast for observation a.
-    path: String, Example: /home/animation.gif 
+    path: String, Example: /home/
        
     Returns
     -------
