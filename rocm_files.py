@@ -14,6 +14,21 @@ import matplotlib.pyplot as plt
 from uroc import uroc, Trapezoidal
 
 def rocm(response, predictor, path):
+    """
+    Creates a sequence of ROC curves and saves them to path.
+
+    Visualizes the performances of predictors for real valued forecasting problems. 
+
+    Parameters
+    ----------
+    response : 1D array_like, 1-D array containing obervation. Need to have the same length in the ``axis`` dimension as b.
+	predictor : 1D array_like, 1-D array containing forecast for observation a.
+    path: String, Example: /home/animation.gif 
+       
+    Returns
+    -------
+    Several png-files
+    """ 
     n = response.shape[0]
     # order response and predictor increasing by response
     response_sorted_indices = np.argsort(response)
