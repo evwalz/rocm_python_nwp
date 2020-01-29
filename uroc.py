@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from scipy.stats import rankdata
 
 def uroc(response, predictor):
-        """
+    """
     Compute uroc curve.
 
     Visualizes the performances of predictors for real valued forecasting problems. 

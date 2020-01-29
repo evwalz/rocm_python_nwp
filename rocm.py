@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Jan 27 12:40:15 2020
+Created on Wed Jan 29 14:03:05 2020
 
 @author: walz
 """
@@ -9,18 +9,32 @@ import numpy as np
 from scipy.stats import rankdata
 from scipy import interp
 import matplotlib.pyplot as plt
+import imageio
 
-# own functions:
 from uroc import uroc, Trapezoidal
 
-def rocm(response, predictor, path):
+def rocm(response, predictor, path, fps = 10, b = 1):
+    response = np.array(response)
+    predictor = np.array(predictor)
+    
+    if np.issubdtype(response.dtype, np.number) == False:
+        raise ValueError('response must be numeric')
+    if np.issubdtype(predictor.dtype, np.number) == False:
+        raise ValueError('predictor must be numeric')
+        
     n = response.shape[0]
-    # order response and predictor increasing by response
+    if len(predictor) != n:
+        raise ValueError('response and predictor should have the same length')
+    if b <= 0 or b > n or np.round(b) !=b:
+        raise ValueError("invalid value for b")    
+    
     response_sorted_indices = np.argsort(response)
     response_sorted = response[response_sorted_indices]
     predictor_sorted = predictor[response_sorted_indices]
     response_unique, response_unique_index = np.unique(response_sorted, return_index=True)
     N = response_unique.shape[0]-1
+    if N == 0:
+        raise ValueError('response must have more than one level')
     a = 400
     b = 1
     if a > N:
@@ -63,7 +77,8 @@ def rocm(response, predictor, path):
     sum_tpr_fpr = np.sum([fpr_weight, tpr_weight], axis=0)
     w = np.round(weights_scale[0],2)
     z = np.round(thresholds_split[0],2)
-    fig = plt.figure()
+    images = []
+    fig = plt.figure(figsize=(6,6))
     plt.plot(InterPoint_zero,hitrate)
     plt.plot([0,1],[0,1], '--', color='grey')
     plt.ylabel('Sensitivity')
@@ -71,8 +86,10 @@ def rocm(response, predictor, path):
     plt.text(0.7,0.2,'AUC: {:3.2f}'.format(auc))
     plt.text(0.17,0.95,'z: %s'%(z))
     plt.text(0.0,0.95,'w: {:3.2f}'.format(w))
-    name = 'animate_0.png'
-    fig.savefig(path + name)
+    fig.canvas.draw()       # draw the canvas, cache the renderer
+    image = np.frombuffer(fig.canvas.tostring_rgb(), dtype='uint8')
+    image = image.reshape(fig.canvas.get_width_height()[::-1] + (3,))
+    images.append(image)
     plt.close()
 
     for i in range(1,(indxsetC.shape[0])):
@@ -91,7 +108,7 @@ def rocm(response, predictor, path):
         hitrate = np.append(0, hitrate)
         w = np.round(weights_scale[i],2)
         z = np.round(thresholds_split[i],2)
-        fig = plt.figure()
+        fig = plt.figure(figsize=(6,6))
         plt.plot(InterPoint_zero,hitrate)
         plt.plot([0,1],[0,1], '--', color='grey')
         plt.ylabel('Sensitivity')
@@ -99,13 +116,19 @@ def rocm(response, predictor, path):
         plt.text(0.7,0.2,'AUC: {:3.2f}'.format(auc))
         plt.text(0.17,0.95,'z: %s'%(z))
         plt.text(0.0,0.95,'w: {:3.2f}'.format(w))
-        name = 'animate_' + str(i) + '.png'
-        fig.savefig(path + name)
+        fig.canvas.draw()       # draw the canvas, cache the renderer
+        image = np.frombuffer(fig.canvas.tostring_rgb(), dtype='uint8')
+        image  = image.reshape(fig.canvas.get_width_height()[::-1] + (3,))
+        images.append(image)
         plt.close()
 
-    fig = plt.figure()    
+    fig = plt.figure(figsize=(6,6))    
     uroc(response, predictor) 
-    name = 'animate_' + str(indxsetC.shape[0]) + '.png'
     plt.title('UROC curve')
-    fig.savefig(path+name)
+    fig.canvas.draw()       # draw the canvas, cache the renderer
+    image = np.frombuffer(fig.canvas.tostring_rgb(), dtype='uint8')
+    image  = image.reshape(fig.canvas.get_width_height()[::-1] + (3,))
+    images.append(image)
     plt.close()
+    
+    imageio.mimsave(path, [images[i] for i in range((N+1))], fps=fps, loop=1)
