@@ -76,6 +76,7 @@ def compute_uroc_approx(response, predictor):
     tpr_interpolated_weight = tpr_interpolated / np.sum(weights_all)
     return (np.insert(InterPoint, 0, 0), np.insert(tpr_interpolated_weight, 0, 0))
 
+# compute approx to cpa
 def Trapezoidal(farate, hitrate):
     diff_farate = np.subtract(farate[1:],farate[:-1])
     means = np.sum([hitrate[1:],hitrate[:-1]], axis=0)*0.5
