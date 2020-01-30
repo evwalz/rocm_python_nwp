@@ -10,9 +10,14 @@ The data is stored in netCDF-format. Before computing the CPA plots the netCDF-f
 - regional data that covers Europe (25W, 44.5E, 74.5N, 25N)
 - ranging from 2007-2018 (In Reanalysis also 27.12.2006-31.12.2006 included to compute persistence forecast)
 - a single value of 2 meter temperature (wind speed, total precipitation) per day
-- thus each file consists of 279 x 199 grid points and 365*9+366*3 = 4383 days
+- thus each file consists of 279 x 199 grid points and 365x9+366x3 = 4383 days
 
-### Code
+### Files
+1. **tigge.sh**:
+performs CDO operations on tigge data set
+
+2. **nwp_cpa_plot**
+uses preprocessed netCDF files to compute cpa plots.
 
 
 
