@@ -1,6 +1,6 @@
 ## ROCM in Numerical Weather Prediction (NWP)
 
-Code to replicate the CPA plots for the numerical weather prediction example in the paper "ROC movies — a new generalization to a popular classic (Example_NWP). 
+Code to replicate the CPA plots for the numerical weather prediction example in the paper "ROC movies — a new generalization to a popular classic. 
 
 ### Data
 HRES forecast and ERA reanalysis product downloaded from European Centre for Medium-Range Weather Forecasts (ECMWF) from https://confluence.ecmwf.int/display/TIGGE and https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-single-levels?tab=overview at initial time 00:00 UTC for the years 2007-2018. Note that for precipitation summation over hourly rainfall from ERA5 is necessary. Both wind speed and 2m Temperature are instantaneous. 
