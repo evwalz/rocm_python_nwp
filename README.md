@@ -5,7 +5,7 @@ For more information see: https://arxiv.org/abs/1912.01956.
 
 The folders:
 
-1. **ROCM_Python:**
+1. [ROCM_Python](ROCM_Python):
 
 Contains python functions to compute rocm, uroc and cpa.
 
