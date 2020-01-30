@@ -6,11 +6,11 @@ For more information see: https://arxiv.org/abs/1912.01956.
 
 **The folders:**
 
-1. [Python_ROCM](Python_ROCM):
+1. [python_rocm](python_rocm):
 
 Contains python functions to compute rocm, uroc and cpa.
 
-2. [Example_NWP](Example_NWP): 
+2. [example_nwp](example_nwp): 
 
 A real data example from numerical weather prediction.   
 
