@@ -14,9 +14,11 @@ The data is stored in netCDF-format. Before computing the CPA plots the netCDF-f
 
 ### Files
 1. **tigge.sh**:
+
 performs CDO operations on tigge data set
 
-2. **nwp_cpa_plot**
+2. **nwp_cpa_plot.py**:
+
 uses preprocessed netCDF files to compute cpa plots.
 
 
