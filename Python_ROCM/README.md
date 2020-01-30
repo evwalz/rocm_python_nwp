@@ -12,7 +12,7 @@ computes the coefficient of predictive ability (cpa).
 
 Creates a uroc curve.
 
-3. **rocm_gif:**
+3. **rocm:**
 
 Creates a GIF animation of a roc movie.
 
