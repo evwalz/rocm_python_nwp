@@ -13,7 +13,6 @@ The data is stored in netCDF-format. Before computing the CPA plots the netCDF-f
 - thus each file consists of 279 x 199 grid points and 365*9+366*3 = 4383 days
 
 ### Code
-The functions to compute the cpa, the uroc curve and the rocm are available in the folder Python_ROCM. 
 
 
 
