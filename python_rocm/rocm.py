@@ -146,4 +146,4 @@ def rocm(response, predictor, path, fps = 10, b = 1):
     images.append(image)
     plt.close()
     
-    imageio.mimsave(path, [images[i] for i in range((N+1))], fps=fps, loop=1)
+    imageio.mimsave(path, [images[i] for i in range((indxsetC.shape[0]))], fps=fps, loop=1)
