@@ -17,6 +17,10 @@ The data is stored in netCDF-format. Before computing the CPA plots the netCDF-f
 
 download tigge data from ECMWF for 2m temperature, precipitation and wind speed for different lead times
 
+2. **RetrieveERA5Data.py**
+
+download ERA5 data from Copernicus Climate Change Service (C3S) Climate Date Store for 2m temperature, precipitation and wind speed
+
 2. **tigge.sh**:
 
 performs CDO operations on tigge data set
