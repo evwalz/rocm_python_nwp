@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import imageio
 
 # own functions
-from uroc_approx import uroc_app, Trapezoidal
+from uroc import uroc_app, Trapezoidal
 
 def rocm(response, predictor, pathGIF, pathPNG):
     """

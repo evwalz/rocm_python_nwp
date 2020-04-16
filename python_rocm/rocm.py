@@ -11,9 +11,9 @@ from scipy import interp
 import matplotlib.pyplot as plt
 import imageio
 
-from uroc import uroc, Trapezoidal
+from uroc import uroc_app, Trapezoidal
 
-def rocm(response, predictor, path, fps = 10, b = 1):
+def rocm(response, predictor, path, fps = 10, b=1):
     """
     Creates a ROC movie.
 
@@ -53,27 +53,41 @@ def rocm(response, predictor, path, fps = 10, b = 1):
     a = 400
     b = 1
     if a > N:
-        a = N
-    s = np.floor((N - 1) / (a - 1))
-    hh = (2 + (a - 1) * s)
-    indx_setCa = np.arange(1, hh , s)
-    class_length = np.subtract(np.append(response_unique_index[2:],n),response_unique_index[1:])
-    indx_setCb = np.where(class_length>n/b)
-    indxsetC = np.sort(np.unique(np.concatenate((indx_setCa, indx_setCb), axis = None)))
+        indx_setC = np.arange(1, (N+1), 1)
+        indxuroc = indx_setC
+        
+    else:
+        if N <= 1000:
+            split = 1
+        elif N <= 10000:
+            split = 10 
+        elif N <= 100000:
+            split = 500
+        elif N <= 1000000:
+            split = 5000
+    #duration = 1/20
+        s = np.floor((N - 1) / (a - 1))
+        hh = (1 + (a - 1) * s)
+        indx_setCa = np.arange(1, hh , s)
+        indx_setCauroc = np.arange(1, N, split)
+        class_length = np.subtract(np.append(response_unique_index[2:],n),response_unique_index[1:])
+        indx_setCb = np.where(class_length>n/b)
+        indx_setC = np.sort(np.unique(np.concatenate((indx_setCa, indx_setCb), axis = None)))
+        indxuroc = np.sort(np.unique(np.concatenate((indx_setCauroc, indx_setCb), axis = None)))
 
-    # compute weights
     ncontrol = (response_unique_index)[1:]
-    ncontrol_split = response_unique_index[indxsetC.astype(int)]
-    thresholds_split = response_unique[indxsetC.astype(int)]
-    ncases_split = n - ncontrol_split
-    weights_split = np.multiply(ncases_split , ncontrol_split)
+    ncontrol_uroc = response_unique_index[indxuroc.astype(int)]
+    ncontrol_split = response_unique_index[indx_setC.astype(int)]
+    thresholds_split = response_unique[indx_setC.astype(int)]
+    weights_split = np.multiply(ncontrol_split, n-ncontrol_split)
     weights_all = np.multiply(ncontrol, n-ncontrol)
     weights_scale = weights_split / np.max(weights_all)
 
-    classes_predictor = rankdata(predictor_sorted, method='dense')
-    Split_classes_predictor = np.split(classes_predictor[:response_unique_index[-1]],ncontrol_split[:-1])
 
-    # compute first roc curve
+    classes_predictor = rankdata(predictor_sorted, method='dense')
+    Split_classes_uroc = np.split(classes_predictor[:response_unique_index[-1]],ncontrol_uroc[:-1])
+    Split_classes_predictor = np.split(classes_predictor[:response_unique_index[-1]],ncontrol_split[:-1])
+    # First roc curve
     order_predictor = predictor.argsort()[::-1]
     response_binary = np.where(np.array(response[order_predictor]) > response_unique[0], 1, 0)
     predictor_sorted = predictor[order_predictor][::-1]
@@ -83,13 +97,22 @@ def rocm(response, predictor, path, fps = 10, b = 1):
     fpr = np.insert(np.cumsum(response_binary == 0)[dups], 0, 0)
     tpr_weight = tpr[::-1]
     fpr_weight = fpr[::-1]
+
+
     InterPoint = np.arange(0, 1001, 1) * 0.001
-    cases = n- ncontrol_split[0]
-    hitrate = np.array(interp(InterPoint, fpr/ncontrol_split[0], tpr/cases))
+
+    cases = n- ncontrol_uroc[0]
+    hitrate = np.array(interp(InterPoint, fpr/ncontrol_uroc[0], tpr/cases))
+
     auc = np.round(Trapezoidal(InterPoint, hitrate),2)
     hitrate = np.append(0, hitrate)
     InterPoint_zero = np.append(0, InterPoint)
     sum_tpr_fpr = np.sum([fpr_weight, tpr_weight], axis=0)
+    lenindx = indxuroc.shape[0]
+    tpru = list(tpr) 
+    fpru = list(fpr)
+    far_uroc, hit_uroc = uroc_app(ncontrol_uroc, tpru, fpru, n, Split_classes_uroc, lenindx)
+
     w = np.round(weights_scale[0],2)
     z = np.round(thresholds_split[0],2)
     images = []
@@ -107,7 +130,8 @@ def rocm(response, predictor, path, fps = 10, b = 1):
     images.append(image)
     plt.close()
 
-    for i in range(1,(indxsetC.shape[0])):
+
+    for i in range(1,(indx_setC.shape[0])):
     
         sorted_split_element = np.sort(np.append(Split_classes_predictor[i],0))
         diff_split_element = np.subtract(sorted_split_element[1:],sorted_split_element[:-1])
@@ -137,8 +161,14 @@ def rocm(response, predictor, path, fps = 10, b = 1):
         images.append(image)
         plt.close()
 
-    fig = plt.figure(figsize=(6,6))    
-    uroc(response, predictor) 
+
+    cpa_approx = np.round(Trapezoidal(far_uroc, hit_uroc),2)
+    fig = plt.figure(figsize=(6,6))
+    plt.plot(far_uroc,hit_uroc)
+    plt.plot([0,1],[0,1], '--', color='grey')
+    plt.ylabel('Sensitivity')
+    plt.xlabel('1 - Specificity')
+    plt.text(0.7,0.2,'CPA: {:3.2f}'.format(cpa_approx))
     plt.title('UROC curve')
     fig.canvas.draw()       # draw the canvas, cache the renderer
     image = np.frombuffer(fig.canvas.tostring_rgb(), dtype='uint8')
@@ -146,4 +176,5 @@ def rocm(response, predictor, path, fps = 10, b = 1):
     images.append(image)
     plt.close()
     
-    imageio.mimsave(path, [images[i] for i in range((len(images)))], fps=fps, loop=1)
+
+    imageio.mimsave(path, [images[i] for i in (range((len(images))))], fps=fps, loop=1)  
