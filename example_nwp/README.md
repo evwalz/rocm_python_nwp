@@ -13,11 +13,15 @@ The data is stored in netCDF-format. Before computing the CPA plots the netCDF-f
 - thus each file consists of 279 x 199 grid points and 365x9+366x3 = 4383 days
 
 ### Files
-1. **tigge.sh**:
+1. **RetrieveTiggeData**
+
+download tigge data from ECMWF for 2m temperature, precipitation and wind speed for different lead times
+
+2. **tigge.sh**:
 
 performs CDO operations on tigge data set
 
-2. **nwp_cpa_plot.py**:
+3. **nwp_cpa_plot.py**:
 
 uses preprocessed netCDF files to compute cpa plots.
 
