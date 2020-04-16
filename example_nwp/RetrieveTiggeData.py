@@ -8,13 +8,11 @@ Created on Tue Aug 27 13:01:18 2019
 from ecmwfapi import ECMWFDataServer
 server = ECMWFDataServer()
 
-#  Leadtime lead = "24", "48" , "72" , "96", "120"
 #  Weather variable paramID = "167" : 2m Temperature
 #                           = "228228" : Precipitation
 #                           = "165/166" : Wind speed (u and v component)      
              
 def retrieve_tigge_data():
-    lead = "24"
     paramID = "167"
     
     dates = ['2006-12-31/to/2007-01-30', '2007-01-31/to/2007-02-27','2007-02-28/to/2007-03-30','2007-03-31/to/2007-04-29','2007-04-30/to/2007-05-30','2007-05-31/to/2007-06-29',
@@ -44,12 +42,12 @@ def retrieve_tigge_data():
  
     for date in dates:
         datestemp = date[14:21]
-        dateleadstemp = lead + '_' + paramID + '_' + datestemp
-        target = 'tiggeLead%s.nc' % (dateleadstemp)
-        tigge_request(date, lead, paramID, target)
+        IDdatestemp = paramID + '_' + datestemp
+        target = 'tiggeLead%s.nc' % (IDdatestemp)
+        tigge_request(date, paramID, target)
 
 
-def tigge_request(date, lead, paramID, target):
+def tigge_request(date, paramID, target):
         '''
        A TIGGE request for perturbed forecast, for 1 origins : ECMWF.
        Keep in mind that if you wish to download the same data, for more than one origins,
@@ -68,7 +66,7 @@ def tigge_request(date, lead, paramID, target):
             "grid": "0.25/0.25",
             "origin": "ecmf",
             "param": paramID,
-            "step": lead,
+            "step": "24",
             "time": "00:00:00",
             "type": "fc",
             "format": "netcdf",
