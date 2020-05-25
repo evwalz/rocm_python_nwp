@@ -47,6 +47,6 @@ def cpa(a, b):
     responseRank = rankdata(responseSort, method='average')
     responseClass = rankdata(responseSort, method='dense')
     
-    return(np.cov(responseClass,forecastRank)[0][1]/np.cov(responseClass,responseRank)[0][1]+1)/2 
+    return((np.cov(responseClass,forecastRank)[0][1]/np.cov(responseClass,responseRank)[0][1]+1)/2) 
 	
  
