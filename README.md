@@ -10,9 +10,9 @@ For more information see: https://arxiv.org/abs/1912.01956.
 
 Contains python functions to compute rocm, uroc and cpa.
 
-2. [example_nwp](example_nwp): 
+2. [example](example): 
 
-A real data example from numerical weather prediction.   
+Real data example from numerical weather prediction and survival analysis  
 
 
 
