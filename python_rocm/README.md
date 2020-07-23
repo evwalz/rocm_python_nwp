@@ -16,9 +16,6 @@ Creates a uroc curve.
 
 Creates a GIF animation of a roc movie.
 
-4. **rocm_and_uroc:**
-
-Creates GIF animation of a roc movie and PNG file of uroc curve. For large data it uses a faster but more imprecise algorithm to compute uroc curve 
 
 
 
