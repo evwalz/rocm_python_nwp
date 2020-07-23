@@ -8,7 +8,7 @@ Created on Fri Dec 13 11:41:40 2019
 import numpy as np
 from scipy.stats import rankdata
 
-def cpa(a, b):
+def cpa(response, predictor):
     """
     Calculate CPA coefficient.
 
@@ -16,33 +16,33 @@ def cpa(a, b):
 
     Parameters
     ----------
-    a : 1D array_like, 1-D array containing observation (reponse). Need to have the same length in the ``axis`` dimension as b.
-    b : 1D array_like, 1-D array containing forecast for observation a.
+    response : 1D array_like, 1-D array containing observation (response). Need to have the same length in the ``axis`` dimension as predictor.
+    predictor : 1D array_like, 1-D array containing predictions for observation.
        
     Returns
     -------
     correlation : float
         	  CPA coefficient 
     """    
-    a = np.asarray(a)
-    if a.ndim > 1:
+    response = np.asarray(response)
+    if response.ndim > 1:
         raise ValueError("CPA only handles 1-D arrays of responses")
 
-    b = np.asarray(b)
+    predictor = np.asarray(predictor)
 	
-    if b.ndim > 1:
+    if predictor.ndim > 1:
         ValueError("CPA only handles 1-D arrays of forecasts")   
   
     	# check for nans
-    if np.isnan(np.sum(a)) == True:
+    if np.isnan(np.sum(response)) == True:
         ValueError("response contains nan values")
 		
-    if np.isnan(np.sum(b)) == True:
+    if np.isnan(np.sum(predictor)) == True:
         ValueError("forecast contains nan values")
 	
-    responseOrder = np.argsort(a)
-    responseSort = a[responseOrder] 
-    forecastSort = b[responseOrder]                
+    responseOrder = np.argsort(response)
+    responseSort = response[responseOrder] 
+    forecastSort = predictor[responseOrder]                
     forecastRank = rankdata(forecastSort, method='average')
     responseRank = rankdata(responseSort, method='average')
     responseClass = rankdata(responseSort, method='dense')
