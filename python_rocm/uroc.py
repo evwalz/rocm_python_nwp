@@ -108,5 +108,37 @@ def trap(farate, hitrate):
     means = np.sum([hitrate[1:],hitrate[:-1]], axis=0)*0.5
     return(np.sum(means * diff_farate))
 
+def uroc_app(ncontrol_uroc, tpr, fpr,n,Split_classes_uroc,lenindx):
+    weights_all_uroc = np.multiply(ncontrol_uroc, n-ncontrol_uroc)
 
+    tpr_weight = tpr[::-1]
+    fpr_weight = fpr[::-1]
+
+#tpr_weight_uroc = list(tpr_weight)
+    InterPoint = np.arange(0, 1001, 1) * 0.001
+
+    cases = n- ncontrol_uroc[0]
+    hitrate = np.array(np.interp(InterPoint, fpr/ncontrol_uroc[0], tpr/cases))
+
+    tpr_interpolated = hitrate* ncontrol_uroc[0]*cases
+
+#auc = np.round(Trapezoidal(InterPoint, hitrate),2)
+    hitrate = np.append(0, hitrate)
+    #InterPoint_zero = np.append(0, InterPoint)
+    sum_tpr_fpr = np.sum([fpr_weight, tpr_weight], axis=0)
+#w = np.round(weights_scale[0],2)
+
+    for i in (range(1,(lenindx))):
+        sorted_split_element = np.sort(np.append(Split_classes_uroc[i],0))
+        diff_split_element = np.subtract(sorted_split_element[1:],sorted_split_element[:-1])
+        m = diff_split_element.shape[0]
+        sum_indicator = np.repeat(np.arange(m,0,-1), diff_split_element, axis=0)
+        seq_change =  sum_indicator.shape[0]
+        tpr_weight[0:seq_change] = np.subtract(np.array(tpr_weight[0:seq_change]), sum_indicator) 
+        fpr = np.subtract(sum_tpr_fpr, tpr_weight) / ncontrol_uroc[i]
+        hitrate = np.interp(InterPoint, np.array(fpr[::-1])  ,np.array(tpr_weight[::-1]) / (n-ncontrol_uroc[i])) 
+        tpr_interpolated = tpr_interpolated + hitrate * ncontrol_uroc[i]*(n- ncontrol_uroc[i])
+
+    tpr_interpolated_weight = tpr_interpolated / np.sum(weights_all_uroc)
+    return (np.insert(InterPoint, 0, 0), np.insert(tpr_interpolated_weight, 0, 0))
 
