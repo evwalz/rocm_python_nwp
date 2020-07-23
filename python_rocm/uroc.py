@@ -72,10 +72,11 @@ def uroc (response, predictor):
     response_binary = np.ones(n)
     response_binary[(n-ncontrol[0]):n] = 0
     
-    order_predictor = predictor.argsort()[::-1]
+    #order_predictor = predictor.argsort()[::-1]
     #response_binary = response_binary[order_predictor] 
     #response_binary = np.where(np.array(response[order_predictor]) > response_unique[0], 1, 0)
-    predictor_sorted = predictor[order_predictor][::-1]
+    #predictor_sorted = predictor[order_predictor][::-1]
+    predictor_sorted = np.sort(predictor)
     predictor_unique, predictor_unique_index = np.unique(predictor_sorted, return_index=True)
     dups = (n - 1) - predictor_unique_index[::-1]
     tpr = np.insert(np.cumsum(response_binary)[dups], 0, 0)
