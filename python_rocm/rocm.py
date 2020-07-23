@@ -1,17 +1,9 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Jan 29 14:03:05 2020
-
-@author: walz
-"""
-
 import numpy as np
 from scipy.stats import rankdata
-from scipy import interp
 import matplotlib.pyplot as plt
 import imageio
 
-from uroc import uroc_app, Trapezoidal
+from uroc import uroc_app, trap
 
 def rocm(response, predictor, path, fps = 10, b=1):
     """
@@ -24,6 +16,7 @@ def rocm(response, predictor, path, fps = 10, b=1):
     response : 1D array_like, 1-D array containing obervation. Need to have the same length in the ``axis`` dimension as b.
 	predictor : 1D array_like, 1-D array containing forecast for observation a.
     path: String, Example: /home/animation.gif 
+    fps: frames per seconds
        
     Returns
     -------
@@ -102,9 +95,9 @@ def rocm(response, predictor, path, fps = 10, b=1):
     InterPoint = np.arange(0, 1001, 1) * 0.001
 
     cases = n- ncontrol_uroc[0]
-    hitrate = np.array(interp(InterPoint, fpr/ncontrol_uroc[0], tpr/cases))
+    hitrate = np.array(np.interp(InterPoint, fpr/ncontrol_uroc[0], tpr/cases))
 
-    auc = np.round(Trapezoidal(InterPoint, hitrate),2)
+    auc = np.round(trap(InterPoint, hitrate),2)
     hitrate = np.append(0, hitrate)
     InterPoint_zero = np.append(0, InterPoint)
     sum_tpr_fpr = np.sum([fpr_weight, tpr_weight], axis=0)
@@ -142,8 +135,8 @@ def rocm(response, predictor, path, fps = 10, b=1):
         fpr = np.subtract(sum_tpr_fpr, tpr_weight) / ncontrol_split[i]
     
     
-        hitrate = interp(InterPoint, np.array(fpr[::-1])  ,np.array(tpr_weight[::-1]) / (n-ncontrol_split[i])) 
-        auc = np.round(Trapezoidal(InterPoint, hitrate),2)
+        hitrate = np.interp(InterPoint, np.array(fpr[::-1])  ,np.array(tpr_weight[::-1]) / (n-ncontrol_split[i])) 
+        auc = np.round(trap(InterPoint, hitrate),2)
         hitrate = np.append(0, hitrate)
         w = np.round(weights_scale[i],2)
         z = np.round(thresholds_split[i],2)
@@ -162,7 +155,7 @@ def rocm(response, predictor, path, fps = 10, b=1):
         plt.close()
 
 
-    cpa_approx = np.round(Trapezoidal(far_uroc, hit_uroc),2)
+    cpa_approx = np.round(trap(far_uroc, hit_uroc),2)
     fig = plt.figure(figsize=(6,6))
     plt.plot(far_uroc,hit_uroc)
     plt.plot([0,1],[0,1], '--', color='grey')
