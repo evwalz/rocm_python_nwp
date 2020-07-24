@@ -1,7 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import rankdata
-
+from sklearn.metrics import roc_curve
+from progressbar import progressbar
 
 class uroc_object:
     def __init__(self, farate, hitrate):
@@ -54,53 +55,55 @@ def uroc (response, predictor):
     
     n = response.shape[0]
     response_sorted_indices = np.argsort(response)
-    response_sorted = response[response_sorted_indices]
-    predictor_sorted = predictor[response_sorted_indices]
-    thresholds, thresholds_index = np.unique(response_sorted, return_index = True)
+    response = response[response_sorted_indices]
+    predictor = predictor[response_sorted_indices]
+    thresholds, thresholds_index = np.unique(response, return_index = True)
     N = thresholds.size
     
     if N < 2:
         raise ValueError("response must have more than one level")
+    if N == 2:
+        fpr, tpr, thres = roc_curve(response, predictor)
+        return(uroc_object(farate = fpr, hitrate = tpr))
+
     ncontrol = thresholds_index[1:]
     
     weights = (response.size - ncontrol) * ncontrol
     weights_s = np.sum(weights)
     classes_predictor = rankdata(predictor, method='dense')
-    Split_classes_predictor = np.split(classes_predictor[:thresholds_index[-1]], thresholds_index[1:-1])
+    split_classes_predictor = np.split(classes_predictor[:thresholds_index[-1]], thresholds_index[1:-1])
 
     # compute first roc curve
     response_binary = np.ones(n)
-    response_binary[(n-ncontrol[0]):n] = 0
+    response_binary[0:ncontrol[0]] = 0
     
-    #order_predictor = predictor.argsort()[::-1]
-    #response_binary = response_binary[order_predictor] 
+    order_predictor = predictor.argsort()[::-1]
+    response_binary = response_binary[order_predictor] 
     #response_binary = np.where(np.array(response[order_predictor]) > response_unique[0], 1, 0)
-    #predictor_sorted = predictor[order_predictor][::-1]
-    predictor_sorted = np.sort(predictor)
+    predictor_sorted = predictor[order_predictor][::-1]
     predictor_unique, predictor_unique_index = np.unique(predictor_sorted, return_index=True)
     dups = (n - 1) - predictor_unique_index[::-1]
     tpr = np.insert(np.cumsum(response_binary)[dups], 0, 0)
     fpr = np.insert(np.cumsum(response_binary == 0)[dups], 0, 0)
     tpr_weight = tpr[::-1]
     fpr_weight = fpr[::-1]
-    InterPoint = np.arange(0, 1001, 1) * 0.001
-    tpr_interpolated = np.array(np.interp(InterPoint, fpr, tpr)) * ncontrol[0]
+    interpoint = np.arange(0, 1001, 1) * 0.001
+    tpr_interpolated = np.array(np.interp(interpoint, fpr/ncontrol[0], tpr)) * ncontrol[0]
     sum_tpr_fpr = np.sum([fpr_weight, tpr_weight], axis=0)
 
-    for i in range(1, (N - 1)):
-        sorted_split_element = np.sort(np.append(Split_classes_predictor[i], 0))
+    for i in progressbar(range(1, (N - 1))):
+        sorted_split_element = np.sort(np.append(split_classes_predictor[i], 0))
         diff_split_element = np.diff(sorted_split_element)
         m = diff_split_element.shape[0]
         sum_indicator = np.repeat(np.arange(m, 0, -1), diff_split_element, axis=0)
         seq_change = sum_indicator.shape[0]
         tpr_weight[0:seq_change] = np.subtract(np.array(tpr_weight[0:seq_change]), sum_indicator)
         fpr = np.subtract(sum_tpr_fpr, tpr_weight) / ncontrol[i]
-        tpr_interpolated = np.interp(InterPoint, np.array(fpr[::-1]),
+        tpr_interpolated = np.interp(interpoint, np.array(fpr[::-1]),
                                   np.array(tpr_weight[::-1]) * ncontrol[i]) + tpr_interpolated
         # final output
     tpr_interpolated_weight = tpr_interpolated / weights_s
-    return(uroc_object(farate = np.insert(InterPoint, 0, 0), hitrate = np.insert(tpr_interpolated_weight, 0, 0)))
-
+    return(uroc_object(farate = np.insert(interpoint, 0, 0), hitrate = np.insert(tpr_interpolated_weight, 0, 0))) 
 
 
 # compute approx to cpa
@@ -108,38 +111,4 @@ def trap(farate, hitrate):
     diff_farate = np.subtract(farate[1:],farate[:-1])
     means = np.sum([hitrate[1:],hitrate[:-1]], axis=0)*0.5
     return(np.sum(means * diff_farate))
-
-def uroc_app(ncontrol_uroc, tpr, fpr,n,Split_classes_uroc,lenindx):
-    weights_all_uroc = np.multiply(ncontrol_uroc, n-ncontrol_uroc)
-
-    tpr_weight = tpr[::-1]
-    fpr_weight = fpr[::-1]
-
-#tpr_weight_uroc = list(tpr_weight)
-    InterPoint = np.arange(0, 1001, 1) * 0.001
-
-    cases = n- ncontrol_uroc[0]
-    hitrate = np.array(np.interp(InterPoint, fpr/ncontrol_uroc[0], tpr/cases))
-
-    tpr_interpolated = hitrate* ncontrol_uroc[0]*cases
-
-#auc = np.round(Trapezoidal(InterPoint, hitrate),2)
-    hitrate = np.append(0, hitrate)
-    #InterPoint_zero = np.append(0, InterPoint)
-    sum_tpr_fpr = np.sum([fpr_weight, tpr_weight], axis=0)
-#w = np.round(weights_scale[0],2)
-
-    for i in (range(1,(lenindx))):
-        sorted_split_element = np.sort(np.append(Split_classes_uroc[i],0))
-        diff_split_element = np.subtract(sorted_split_element[1:],sorted_split_element[:-1])
-        m = diff_split_element.shape[0]
-        sum_indicator = np.repeat(np.arange(m,0,-1), diff_split_element, axis=0)
-        seq_change =  sum_indicator.shape[0]
-        tpr_weight[0:seq_change] = np.subtract(np.array(tpr_weight[0:seq_change]), sum_indicator) 
-        fpr = np.subtract(sum_tpr_fpr, tpr_weight) / ncontrol_uroc[i]
-        hitrate = np.interp(InterPoint, np.array(fpr[::-1])  ,np.array(tpr_weight[::-1]) / (n-ncontrol_uroc[i])) 
-        tpr_interpolated = tpr_interpolated + hitrate * ncontrol_uroc[i]*(n- ncontrol_uroc[i])
-
-    tpr_interpolated_weight = tpr_interpolated / np.sum(weights_all_uroc)
-    return (np.insert(InterPoint, 0, 0), np.insert(tpr_interpolated_weight, 0, 0))
 

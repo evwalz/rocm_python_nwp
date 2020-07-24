@@ -65,8 +65,8 @@ hist_bili = ggplot(data =df_bili, aes(x=x,color=survival,fill=survival))+geom_hi
   geom_segment(aes(x=thres_bili2,y=0,xend=thres_bili2,yend=22), size=1, lty=5,color="#FD8D3C")
 
 # ROC curve
-roc_alb = uroc(response_bin, alb, object = TRUE, plot=FALSE, algo = 'exact')
-roc_bili = uroc(response_bin, bili, object = TRUE, plot=FALSE, algo = 'exact')
+roc_alb = uroc(response_bin, alb)
+roc_bili = uroc(response_bin, bili)
 
 response_order <- order(response_bin, decreasing=FALSE)
 response <- response[response_order]

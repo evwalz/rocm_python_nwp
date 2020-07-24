@@ -3,7 +3,7 @@ from scipy.stats import rankdata
 import matplotlib.pyplot as plt
 import imageio
 
-from uroc import uroc_app, trap
+#from uroc import uroc_app, Trapezoidal
 
 def rocm(response, predictor, path, fps = 10, b=1):
     """
@@ -16,7 +16,6 @@ def rocm(response, predictor, path, fps = 10, b=1):
     response : 1D array_like, 1-D array containing obervation. Need to have the same length in the ``axis`` dimension as b.
 	predictor : 1D array_like, 1-D array containing forecast for observation a.
     path: String, Example: /home/animation.gif 
-    fps: frames per seconds
        
     Returns
     -------
@@ -78,8 +77,8 @@ def rocm(response, predictor, path, fps = 10, b=1):
 
 
     classes_predictor = rankdata(predictor_sorted, method='dense')
-    Split_classes_uroc = np.split(classes_predictor[:response_unique_index[-1]],ncontrol_uroc[:-1])
-    Split_classes_predictor = np.split(classes_predictor[:response_unique_index[-1]],ncontrol_split[:-1])
+    split_classes_uroc = np.split(classes_predictor[:response_unique_index[-1]],ncontrol_uroc[:-1])
+    split_classes_predictor = np.split(classes_predictor[:response_unique_index[-1]],ncontrol_split[:-1])
     # First roc curve
     order_predictor = predictor.argsort()[::-1]
     response_binary = np.where(np.array(response[order_predictor]) > response_unique[0], 1, 0)
@@ -92,25 +91,25 @@ def rocm(response, predictor, path, fps = 10, b=1):
     fpr_weight = fpr[::-1]
 
 
-    InterPoint = np.arange(0, 1001, 1) * 0.001
+    interpoint = np.arange(0, 1001, 1) * 0.001
 
     cases = n- ncontrol_uroc[0]
-    hitrate = np.array(np.interp(InterPoint, fpr/ncontrol_uroc[0], tpr/cases))
+    hitrate = np.array(np.interp(interpoint, fpr/ncontrol_uroc[0], tpr/cases))
 
-    auc = np.round(trap(InterPoint, hitrate),2)
+    auc = np.round(trap(interpoint, hitrate),2)
     hitrate = np.append(0, hitrate)
-    InterPoint_zero = np.append(0, InterPoint)
+    interpoint_zero = np.append(0, interpoint)
     sum_tpr_fpr = np.sum([fpr_weight, tpr_weight], axis=0)
     lenindx = indxuroc.shape[0]
     tpru = list(tpr) 
     fpru = list(fpr)
-    far_uroc, hit_uroc = uroc_app(ncontrol_uroc, tpru, fpru, n, Split_classes_uroc, lenindx)
+    far_uroc, hit_uroc = uroc_app(ncontrol_uroc, tpru, fpru, n, split_classes_uroc, lenindx)
 
     w = np.round(weights_scale[0],2)
     z = np.round(thresholds_split[0],2)
     images = []
     fig = plt.figure(figsize=(6,6))
-    plt.plot(InterPoint_zero,hitrate)
+    plt.plot(interpoint_zero,hitrate)
     plt.plot([0,1],[0,1], '--', color='grey')
     plt.ylabel('Sensitivity')
     plt.xlabel('1 - Specificity')
@@ -123,10 +122,9 @@ def rocm(response, predictor, path, fps = 10, b=1):
     images.append(image)
     plt.close()
 
-
     for i in range(1,(indx_setC.shape[0])):
     
-        sorted_split_element = np.sort(np.append(Split_classes_predictor[i],0))
+        sorted_split_element = np.sort(np.append(split_classes_predictor[i],0))
         diff_split_element = np.subtract(sorted_split_element[1:],sorted_split_element[:-1])
         m = diff_split_element.shape[0]
         sum_indicator = np.repeat(np.arange(m,0,-1), diff_split_element, axis=0)
@@ -135,13 +133,13 @@ def rocm(response, predictor, path, fps = 10, b=1):
         fpr = np.subtract(sum_tpr_fpr, tpr_weight) / ncontrol_split[i]
     
     
-        hitrate = np.interp(InterPoint, np.array(fpr[::-1])  ,np.array(tpr_weight[::-1]) / (n-ncontrol_split[i])) 
-        auc = np.round(trap(InterPoint, hitrate),2)
+        hitrate = np.interp(interpoint, np.array(fpr[::-1])  ,np.array(tpr_weight[::-1]) / (n-ncontrol_split[i])) 
+        auc = np.round(trap(interpoint, hitrate),2)
         hitrate = np.append(0, hitrate)
         w = np.round(weights_scale[i],2)
         z = np.round(thresholds_split[i],2)
         fig = plt.figure(figsize=(6,6))
-        plt.plot(InterPoint_zero,hitrate)
+        plt.plot(interpoint_zero,hitrate)
         plt.plot([0,1],[0,1], '--', color='grey')
         plt.ylabel('Sensitivity')
         plt.xlabel('1 - Specificity')
@@ -169,5 +167,45 @@ def rocm(response, predictor, path, fps = 10, b=1):
     images.append(image)
     plt.close()
     
-
     imageio.mimsave(path, [images[i] for i in (range((len(images))))], fps=fps, loop=1)  
+
+
+def trap(farate, hitrate):
+    diff_farate = np.subtract(farate[1:],farate[:-1])
+    means = np.sum([hitrate[1:],hitrate[:-1]], axis=0)*0.5
+    return(np.sum(means * diff_farate))
+
+def uroc_app(ncontrol_uroc, tpr, fpr,n,Split_classes_uroc,lenindx):
+    weights_all_uroc = np.multiply(ncontrol_uroc, n-ncontrol_uroc)
+
+    tpr_weight = tpr[::-1]
+    fpr_weight = fpr[::-1]
+
+    #tpr_weight_uroc = list(tpr_weight)
+    interpoint = np.arange(0, 1001, 1) * 0.001
+
+    cases = n- ncontrol_uroc[0]
+    hitrate = np.array(np.interp(interpoint, fpr/ncontrol_uroc[0], tpr/cases))
+
+    tpr_interpolated = hitrate* ncontrol_uroc[0]*cases
+
+    #auc = np.round(Trapezoidal(InterPoint, hitrate),2)
+    hitrate = np.append(0, hitrate)
+    #InterPoint_zero = np.append(0, InterPoint)
+    sum_tpr_fpr = np.sum([fpr_weight, tpr_weight], axis=0)
+    #w = np.round(weights_scale[0],2)
+
+    for i in (range(1,(lenindx))):
+        sorted_split_element = np.sort(np.append(Split_classes_uroc[i],0))
+        diff_split_element = np.subtract(sorted_split_element[1:],sorted_split_element[:-1])
+        m = diff_split_element.shape[0]
+        sum_indicator = np.repeat(np.arange(m,0,-1), diff_split_element, axis=0)
+        seq_change =  sum_indicator.shape[0]
+        tpr_weight[0:seq_change] = np.subtract(np.array(tpr_weight[0:seq_change]), sum_indicator) 
+        fpr = np.subtract(sum_tpr_fpr, tpr_weight) / ncontrol_uroc[i]
+        hitrate = np.interp(interpoint, np.array(fpr[::-1])  ,np.array(tpr_weight[::-1]) / (n-ncontrol_uroc[i])) 
+        tpr_interpolated = tpr_interpolated + hitrate * ncontrol_uroc[i]*(n- ncontrol_uroc[i])
+
+    tpr_interpolated_weight = tpr_interpolated / np.sum(weights_all_uroc)
+    return (np.insert(interpoint, 0, 0), np.insert(tpr_interpolated_weight, 0, 0))
+

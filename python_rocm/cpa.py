@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Dec 13 11:41:40 2019
-
-@author: walz
-"""
-
 import numpy as np
 from scipy.stats import rankdata
 

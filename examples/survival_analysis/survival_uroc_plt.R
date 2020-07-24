@@ -19,8 +19,8 @@ name_alb <- "Albumin"
 name_bili <- "Bilirubin"
 
 # uroc plot 
-uroc_alb <- uroc(response, alb, object = TRUE, plot=FALSE, algo = 'exact')
-uroc_bili <- uroc(response, bili, object = TRUE, plot=FALSE, algo = 'exact')
+uroc_alb <- uroc(response, alb)
+uroc_bili <- uroc(response, bili)
 
 cpa_alb <- round(cpa(response, alb),2)
 cpa_bili <- round(cpa(response, bili),2)
@@ -49,5 +49,5 @@ uroc_survival = ggplot()+geom_line(data=data.frame(x=c(0,1),y=c(0,1)),aes(x=x,y=
 print(uroc_survival)
 
 # animation of rocm
-rocm(response, alb,algo='exact')
-rocm(response, bili,algo='exact')
+rocm(response, alb)
+rocm(response, bili)
